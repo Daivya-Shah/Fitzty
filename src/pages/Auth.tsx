@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import fitztyLogo from "@/assets/fitzty-logo.jpg";
 
 const Auth = () => {
-  const [isSignUp, setIsSignUp] = useState(false);
+  const location = useLocation();
+  const [isSignUp, setIsSignUp] = useState(() => location.search.includes('signup'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
@@ -225,9 +227,10 @@ const Auth = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-aqua-500 text-white py-3 px-4 rounded-full font-medium hover:bg-aqua-600 focus:outline-none focus:ring-2 focus:ring-aqua-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="button-primary flex items-center justify-center group w-full text-center"
             >
               {loading ? 'Please wait...' : (isSignUp ? 'Sign Up' : 'Sign In')}
+              <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
             </button>
           </form>
           <div className="mt-6 text-center">

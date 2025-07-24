@@ -1,29 +1,7 @@
-import React, { useState } from "react";
-import { toast } from "@/components/ui/use-toast";
+import React from "react";
+import { Link } from "react-router-dom";
+// import { toast } from "@/components/ui/use-toast";
 const Newsletter = () => {
-  const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) {
-      toast({
-        title: "Please enter your email address",
-        variant: "destructive"
-      });
-      return;
-    }
-    setIsSubmitting(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: "Welcome to Fitzty!",
-        description: "Your sign up was successful. Get ready to express your style!"
-      });
-      setEmail("");
-      setIsSubmitting(false);
-    }, 1000);
-  };
   return <section id="join-waitlist" className="bg-white py-0">
       <div className="section-container opacity-0 animate-on-scroll">
         <div className="max-w-6xl mx-auto">
@@ -39,9 +17,9 @@ const Newsletter = () => {
           </p>
           
           <div className="flex justify-start md:justify-start">
-            <button onClick={handleSubmit} disabled={isSubmitting} className="button-primary py-4 px-10">
-              {isSubmitting ? "Signing Up..." : "Sign Up"}
-            </button>
+            <Link to="/auth?signup" className="button-primary py-4 px-10 text-center">
+              Sign Up
+            </Link>
           </div>
         </div>
       </div>
