@@ -91,7 +91,8 @@ const Hero = () => {
       className="overflow-hidden relative" 
       id="hero" 
       style={{
-        padding: isMobile ? '100px 12px 40px' : '120px 20px 60px'
+        padding: isMobile ? '140px 12px 60px' : '200px 20px 120px', // Increased top and bottom padding
+        background: '#fff'
       }}
     >
       <div className="absolute -top-[10%] -right-[5%] w-1/2 h-[70%] bg-aqua-gradient opacity-20 blur-3xl rounded-full"></div>
@@ -103,8 +104,7 @@ const Hero = () => {
               className="fitzty-chip mb-3 sm:mb-6 opacity-0 animate-fade-in" 
               style={{ animationDelay: "0.1s" }}
             >
-              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground mr-2 text-sm font-semibold">✨</span>
-              <span>Share Your Style</span>
+              <span className="w-full text-center">Share Your Style</span>
             </div>
             
             <h1 
@@ -131,13 +131,6 @@ const Hero = () => {
               >
                 Get Started
                 <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </a>
-              
-              <a 
-                href="#how-it-works" 
-                className="button-secondary flex items-center justify-center w-full sm:w-auto text-center"
-              >
-                See How It Works
               </a>
             </div>
           </div>
