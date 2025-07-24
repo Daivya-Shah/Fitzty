@@ -88,20 +88,12 @@ const HumanoidSection = () => {
       className="relative" 
       style={{ height: '300vh' }}
     >
-      <section className="w-full h-screen py-10 md:py-16 sticky top-0 overflow-hidden bg-white" id="why-humanoid">
+      <section className="w-full h-screen py-10 md:py-16 sticky top-0 overflow-hidden bg-gray-50" id="why-humanoid">
         <div className="container px-6 lg:px-8 mx-auto h-full flex flex-col">
           <div className="mb-2 md:mb-3">
-            <div className="flex items-center gap-4 mb-2 md:mb-2 pt-8 sm:pt-6 md:pt-4">
-              <div className="pulse-chip opacity-0 animate-fade-in" style={{
-                animationDelay: "0.1s"
-              }}>
-                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-pulse-500 text-white mr-2">02</span>
-                <span>Why Fitzty</span>
-              </div>
-            </div>
-            
+            <div className="pt-8 sm:pt-6 md:pt-4 mb-2 md:mb-2" style={{height: '40px'}}></div>
             <h2 className="section-title text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-1 md:mb-2">
-              Why Fitzty Works
+              Welcome to Fitzty
             </h2>
           </div>
           

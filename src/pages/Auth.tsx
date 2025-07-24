@@ -115,28 +115,19 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-aqua-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center text-foreground/60 hover:text-foreground mb-6 transition-colors">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </Link>
-          
-          <div className="flex justify-center mb-4">
-            <img src={fitztyLogo} alt="Fitzty" className="h-12 w-12 rounded-lg" />
+        {/* Chip and Heading */}
+        <div className="flex items-center gap-4 mb-6 justify-center">
+          <div className="fitzty-chip">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground mr-2 text-sm font-semibold">{isSignUp ? '📝' : '🔑'}</span>
+            <span>{isSignUp ? 'Sign Up' : 'Sign In'}</span>
           </div>
-          
-          <h1 className="text-2xl font-bold text-foreground mb-2">
-            {isSignUp ? 'Join Fitzty' : 'Welcome Back'}
-          </h1>
-          <p className="text-foreground/60">
-            {isSignUp 
-              ? 'Create your account to start sharing your style'
-              : 'Sign in to your Fitzty account'
-            }
-          </p>
         </div>
-
+        <h2 className="text-4xl font-display font-bold mb-2 text-center">{isSignUp ? 'Sign Up for Fitzty' : 'Sign In to Fitzty'}</h2>
+        <p className="text-lg text-muted-foreground mb-8 text-center">
+          {isSignUp
+            ? 'Create your Fitzty account to start expressing your style.'
+            : 'Welcome back! Sign in to access your Fitzty account.'}
+        </p>
         {/* Auth Form */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
           {error && (
@@ -144,13 +135,11 @@ const Auth = () => {
               {error}
             </div>
           )}
-          
           {success && (
             <div className="bg-aqua-50 border border-aqua-200 text-aqua-700 px-4 py-3 rounded-lg mb-4 text-sm">
               {success}
             </div>
           )}
-
           <form onSubmit={handleAuth} className="space-y-4">
             {isSignUp && (
               <div>
@@ -162,13 +151,12 @@ const Auth = () => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-400 focus:border-transparent bg-background text-foreground"
+                  className="w-full px-6 py-4 rounded-full border border-border focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
                   placeholder="Choose a unique username"
                   disabled={loading}
                 />
               </div>
             )}
-
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
                 Email *
@@ -178,12 +166,11 @@ const Auth = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-400 focus:border-transparent bg-background text-foreground"
+                className="w-full px-6 py-4 rounded-full border border-border focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
                 placeholder="Enter your email"
                 disabled={loading}
               />
             </div>
-
             {isSignUp && (
               <div>
                 <label htmlFor="universityEmail" className="block text-sm font-medium text-foreground mb-1">
@@ -195,7 +182,7 @@ const Auth = () => {
                   type="email"
                   value={universityEmail}
                   onChange={(e) => setUniversityEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-400 focus:border-transparent bg-background text-foreground"
+                  className="w-full px-6 py-4 rounded-full border border-border focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
                   placeholder="your.name@university.edu"
                   disabled={loading}
                 />
@@ -206,7 +193,6 @@ const Auth = () => {
                 )}
               </div>
             )}
-
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
                 Password *
@@ -217,7 +203,7 @@ const Auth = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 pr-10 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-400 focus:border-transparent bg-background text-foreground"
+                  className="w-full px-6 py-4 pr-10 rounded-full border border-border focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
                   placeholder={isSignUp ? 'Create a secure password' : 'Enter your password'}
                   disabled={loading}
                 />
@@ -236,16 +222,14 @@ const Auth = () => {
                 </p>
               )}
             </div>
-
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-aqua-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-aqua-600 focus:outline-none focus:ring-2 focus:ring-aqua-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full bg-aqua-500 text-white py-3 px-4 rounded-full font-medium hover:bg-aqua-600 focus:outline-none focus:ring-2 focus:ring-aqua-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
+              {loading ? 'Please wait...' : (isSignUp ? 'Sign Up' : 'Sign In')}
             </button>
           </form>
-
           <div className="mt-6 text-center">
             <button
               onClick={() => {
@@ -260,7 +244,6 @@ const Auth = () => {
             </button>
           </div>
         </div>
-
         {/* Footer */}
         <div className="text-center mt-6">
           <p className="text-xs text-foreground/60">

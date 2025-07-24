@@ -4,13 +4,9 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import HumanoidSection from "@/components/HumanoidSection";
 import SpecsSection from "@/components/SpecsSection";
-import DetailsSection from "@/components/DetailsSection";
 import ImageShowcaseSection from "@/components/ImageShowcaseSection";
 import Features from "@/components/Features";
-import Testimonials from "@/components/Testimonials";
 import Newsletter from "@/components/Newsletter";
-import MadeByHumans from "@/components/MadeByHumans";
-import Footer from "@/components/Footer";
 
 const Index = () => {
   // Initialize intersection observer to detect when elements enter viewport
@@ -65,14 +61,11 @@ const Index = () => {
         <Hero />
         <HumanoidSection />
         <SpecsSection />
-        <DetailsSection />
         <ImageShowcaseSection />
         <Features />
-        <Testimonials />
         <Newsletter />
-        <MadeByHumans />
       </main>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };
