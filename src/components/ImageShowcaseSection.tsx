@@ -1,5 +1,6 @@
 
 import React from "react";
+import fitztyImage from "@/assets/fitzty.jpg";
 
 const ImageShowcaseSection = () => {
   return (
@@ -17,7 +18,7 @@ const ImageShowcaseSection = () => {
         <div className="rounded-2xl sm:rounded-3xl overflow-hidden shadow-elegant mx-auto max-w-4xl animate-on-scroll">
           <div className="w-full">
             <img 
-              src={require('@/assets/fitzty.jpg')} 
+              src={fitztyImage} 
               alt="Fitzty Gen Z fashion community" 
               className="w-full h-auto object-cover"
             />
