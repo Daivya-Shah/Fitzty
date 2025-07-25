@@ -70,7 +70,7 @@ const Profile = () => {
         {/* Sidebar */}
         <div className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 shadow-sm flex flex-col pt-20 z-40">
           {/* Profile Section */}
-          <div className="flex flex-col items-center p-6 border-b border-gray-100">
+          <div className="flex flex-col items-center pt-2 pb-6 border-b border-gray-100">
             <Avatar className="w-20 h-20 mb-3">
               <AvatarImage src={user?.user_metadata?.avatar_url || undefined} alt="Profile" />
               <AvatarFallback className="text-2xl">{user?.user_metadata?.username?.[0]?.toUpperCase() || ""}</AvatarFallback>
@@ -116,10 +116,10 @@ const Profile = () => {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 ml-64 px-4 py-12 mt-8 pt-20">
+        <main className="flex-1 ml-64 px-4 pt-20">
         {/* Profile Header */}
         <div className="relative flex flex-col md:flex-row items-center md:items-end gap-8 mb-12">
-          <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-primary shadow-lg bg-white">
+          <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-primary shadow-lg bg-white mt-2">
             <Avatar className="w-32 h-32">
               <AvatarImage src={user?.user_metadata?.avatar_url || undefined} alt="Profile" />
               <AvatarFallback className="text-4xl">{user?.user_metadata?.username?.[0]?.toUpperCase() || ""}</AvatarFallback>

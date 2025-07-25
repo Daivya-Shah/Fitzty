@@ -86,22 +86,6 @@ const Navbar = () => {
               <a href="/explore" className="nav-link">Explore</a>
             )
           )}
-          {/* Only show settings and profile if NOT on home, auth, or profile page */}
-          {!(isHome || isAuth || isProfile) && <>
-            <button className="ml-4 p-2 rounded-full bg-white border border-gray-200 shadow hover:bg-aqua-50 transition-colors" aria-label="Settings">
-              <Settings className="w-6 h-6 text-aqua-600" />
-            </button>
-            <a
-              href="/profile"
-              className="ml-2 w-10 h-10 rounded-full hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-primary"
-              aria-label="Profile"
-            >
-              <Avatar>
-                <AvatarImage src={user?.user_metadata?.avatar_url || undefined} alt="Profile" />
-                <AvatarFallback>{user?.user_metadata?.username?.[0]?.toUpperCase() || ""}</AvatarFallback>
-              </Avatar>
-            </a>
-          </>}
         </nav>
 
         {/* Mobile menu button - increased touch target */}
@@ -140,22 +124,6 @@ const Navbar = () => {
               <a href="/explore" className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100">Explore</a>
             )
           )}
-          {/* Only show settings and profile if NOT on home, auth, or profile page */}
-          {!(isHome || isAuth || isProfile) && <>
-            <button className="mt-4 p-2 rounded-full bg-white border border-gray-200 shadow hover:bg-aqua-50 transition-colors" aria-label="Settings">
-              <Settings className="w-6 h-6 text-aqua-600" />
-            </button>
-            <a
-              href="/profile"
-              className="mt-2 w-10 h-10 rounded-full hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-primary"
-              aria-label="Profile"
-            >
-              <Avatar>
-                <AvatarImage src={user?.user_metadata?.avatar_url || undefined} alt="Profile" />
-                <AvatarFallback>{user?.user_metadata?.username?.[0]?.toUpperCase() || ""}</AvatarFallback>
-              </Avatar>
-            </a>
-          </>}
         </nav>
       </div>
     </header>
