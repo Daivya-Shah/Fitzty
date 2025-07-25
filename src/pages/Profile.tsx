@@ -159,6 +159,12 @@ const Profile = () => {
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 py-4 flex justify-center shadow-lg">
         <button
           className="button-primary px-8 py-3 rounded-full text-lg font-bold shadow-md hover:scale-105 transition-transform mr-4"
+          // TODO: Add handler for adding clothing item
+        >
+          + Add Clothing Item
+        </button>
+        <button
+          className="button-primary px-8 py-3 rounded-full text-lg font-bold shadow-md hover:scale-105 transition-transform mr-4"
           onClick={() => setShowModal(true)}
         >
           + Create Fit

@@ -14,6 +14,7 @@ const Navbar = () => {
   const location = useLocation();
   const isHome = location.pathname === "/";
   const isAuth = location.pathname.startsWith("/auth");
+  const isProfile = location.pathname.startsWith("/profile");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,7 +51,11 @@ const Navbar = () => {
           className="flex items-center space-x-2"
           onClick={(e) => {
             e.preventDefault();
-            scrollToTop();
+            if (isProfile) {
+              window.location.href = "/";
+            } else {
+              scrollToTop();
+            }
           }}
           aria-label="Fitzty"
         >
@@ -61,11 +66,18 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-8 items-center">
-          <a 
-            href="/" 
-            className="nav-link"
-            {...(isHome ? { onClick: e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } } : {})}
-          >Home</a>
+          {isProfile ? (
+            <a 
+              href="/feeds" 
+              className="nav-link"
+            >Feed</a>
+          ) : (
+            <a 
+              href="/" 
+              className="nav-link"
+              {...(isHome ? { onClick: e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } } : {})}
+            >Home</a>
+          )}
           {/* Hide all other buttons on auth page */}
           {!isAuth && (
             isHome ? (
@@ -74,8 +86,8 @@ const Navbar = () => {
               <a href="/explore" className="nav-link">Explore</a>
             )
           )}
-          {/* Only show settings and profile if NOT on home or auth page */}
-          {!(isHome || isAuth) && <>
+          {/* Only show settings and profile if NOT on home, auth, or profile page */}
+          {!(isHome || isAuth || isProfile) && <>
             <button className="ml-4 p-2 rounded-full bg-white border border-gray-200 shadow hover:bg-aqua-50 transition-colors" aria-label="Settings">
               <Settings className="w-6 h-6 text-aqua-600" />
             </button>
@@ -108,11 +120,18 @@ const Navbar = () => {
         isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"
       )}>
         <nav className="flex flex-col space-y-8 items-center mt-8">
-          <a 
-            href="/" 
-            className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100"
-            {...(isHome ? { onClick: e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } } : {})}
-          >Home</a>
+          {isProfile ? (
+            <a 
+              href="/feeds" 
+              className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100"
+            >Feed</a>
+          ) : (
+            <a 
+              href="/" 
+              className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100"
+              {...(isHome ? { onClick: e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } } : {})}
+            >Home</a>
+          )}
           {/* Hide all other buttons on auth page */}
           {!isAuth && (
             isHome ? (
@@ -121,8 +140,8 @@ const Navbar = () => {
               <a href="/explore" className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100">Explore</a>
             )
           )}
-          {/* Only show settings and profile if NOT on home or auth page */}
-          {!(isHome || isAuth) && <>
+          {/* Only show settings and profile if NOT on home, auth, or profile page */}
+          {!(isHome || isAuth || isProfile) && <>
             <button className="mt-4 p-2 rounded-full bg-white border border-gray-200 shadow hover:bg-aqua-50 transition-colors" aria-label="Settings">
               <Settings className="w-6 h-6 text-aqua-600" />
             </button>
