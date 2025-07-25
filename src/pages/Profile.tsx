@@ -14,7 +14,7 @@ const wardrobe = [
 ];
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [tab, setTab] = useState("wardrobe");
   const [showModal, setShowModal] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -96,6 +96,14 @@ const Profile = () => {
                   <span className="text-xs font-normal text-gray-500">Wardrobe</span>
                 </span>
               </div>
+            </div>
+            <div className="flex justify-center md:justify-end">
+              <button
+                onClick={signOut}
+                className="px-6 py-2 rounded-full font-semibold text-base transition-colors duration-200 bg-red-100 text-red-600 hover:bg-red-200"
+              >
+                Log Out
+              </button>
             </div>
           </div>
         </div>
