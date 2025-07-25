@@ -118,7 +118,7 @@ const Auth = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-aqua-50 flex items-center justify-center p-4">
+      <div className={`min-h-screen bg-gradient-to-br from-background via-background to-aqua-50 flex items-center justify-center p-4${isSignUp ? ' mt-20' : ''}`}>
         <div className="w-full max-w-md">
           {/* Chip and Heading */}
           <div className="flex items-center gap-4 mb-6 justify-center">
