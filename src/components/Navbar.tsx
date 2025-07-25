@@ -13,6 +13,7 @@ const Navbar = () => {
   const { user } = useAuth();
   const location = useLocation();
   const isHome = location.pathname === "/";
+  const isAuth = location.pathname.startsWith("/auth");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,13 +66,16 @@ const Navbar = () => {
             className="nav-link"
             {...(isHome ? { onClick: e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } } : {})}
           >Home</a>
-          {isHome ? (
-            <a href="#features" className="nav-link">Features</a>
-          ) : (
-            <a href="/explore" className="nav-link">Explore</a>
+          {/* Hide all other buttons on auth page */}
+          {!isAuth && (
+            isHome ? (
+              <a href="#features" className="nav-link">Features</a>
+            ) : (
+              <a href="/explore" className="nav-link">Explore</a>
+            )
           )}
-          {/* Only show settings and profile if not on home page after authentication */}
-          {!(user && isHome) && <>
+          {/* Only show settings and profile if NOT on home or auth page */}
+          {!(isHome || isAuth) && <>
             <button className="ml-4 p-2 rounded-full bg-white border border-gray-200 shadow hover:bg-aqua-50 transition-colors" aria-label="Settings">
               <Settings className="w-6 h-6 text-aqua-600" />
             </button>
@@ -109,13 +113,16 @@ const Navbar = () => {
             className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100"
             {...(isHome ? { onClick: e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } } : {})}
           >Home</a>
-          {isHome ? (
-            <a href="#features" className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100">Features</a>
-          ) : (
-            <a href="/explore" className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100">Explore</a>
+          {/* Hide all other buttons on auth page */}
+          {!isAuth && (
+            isHome ? (
+              <a href="#features" className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100">Features</a>
+            ) : (
+              <a href="/explore" className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100">Explore</a>
+            )
           )}
-          {/* Only show settings and profile if not on home page after authentication */}
-          {!(user && isHome) && <>
+          {/* Only show settings and profile if NOT on home or auth page */}
+          {!(isHome || isAuth) && <>
             <button className="mt-4 p-2 rounded-full bg-white border border-gray-200 shadow hover:bg-aqua-50 transition-colors" aria-label="Settings">
               <Settings className="w-6 h-6 text-aqua-600" />
             </button>
