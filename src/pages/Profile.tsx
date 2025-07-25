@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import fitztyProfile from "@/assets/fitzty-hero.jpg";
 import fitztyWardrobe from "@/assets/fitzty.jpg";
 import useAuth from "@/hooks/useAuth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
+import EditProfileModal from "@/components/EditProfileModal";
+import { Edit, UserPlus } from "lucide-react";
 
 const wardrobe = [
   { id: 1, name: "Blue Jeans", image: fitztyWardrobe, type: "pants" },
@@ -24,6 +27,55 @@ const Profile = () => {
   const [avatarReady, setAvatarReady] = useState(false);
   const [showPostModal, setShowPostModal] = useState(false);
   const [selectedFitId, setSelectedFitId] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [profileData, setProfileData] = useState({
+    first_name: '',
+    last_name: '',
+    username: '',
+    bio: '',
+    avatar_url: '',
+    followers_count: 0,
+    following_count: 0
+  });
+
+  // Fetch profile data
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (error) throw error;
+        
+        if (data) {
+          setProfileData(data);
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchProfileData();
+  }, [user]);
+
+  const handleProfileUpdate = () => {
+    // Refresh profile data after update
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+        .then(({ data }) => {
+          if (data) setProfileData(data);
+        });
+    }
+  };
   const selectedItems = selectedIds.map(id => wardrobe.find(w => w.id === id)).filter(Boolean);
   const toggleSelect = (id) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -72,10 +124,17 @@ const Profile = () => {
           {/* Profile Section */}
           <div className="flex flex-col items-center pt-2 pb-6 border-b border-gray-100">
             <Avatar className="w-20 h-20 mb-3">
-              <AvatarImage src={user?.user_metadata?.avatar_url || undefined} alt="Profile" />
-              <AvatarFallback className="text-2xl">{user?.user_metadata?.username?.[0]?.toUpperCase() || ""}</AvatarFallback>
+              <AvatarImage src={profileData.avatar_url || undefined} alt="Profile" />
+              <AvatarFallback className="text-2xl">{profileData.username?.[0]?.toUpperCase() || user?.user_metadata?.username?.[0]?.toUpperCase() || ""}</AvatarFallback>
             </Avatar>
-            <h3 className="font-semibold text-lg">@{user?.user_metadata?.username || "N/A"}</h3>
+            <h3 className="font-semibold text-lg">@{profileData.username || user?.user_metadata?.username || "N/A"}</h3>
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="flex items-center gap-2 mt-2 px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <Edit className="w-4 h-4" />
+              Edit Profile
+            </button>
           </div>
 
           {/* Action Buttons */}
@@ -118,23 +177,39 @@ const Profile = () => {
         {/* Main Content */}
         <main className="flex-1 ml-64 px-4 pt-20">
         {/* Profile Header */}
-        <div className="relative flex flex-col md:flex-row items-center md:items-end gap-8 mb-12">
+        <div className="relative flex flex-col md:flex-row items-center md:items-start gap-8 mb-12">
           <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-primary shadow-lg bg-white mt-2">
             <Avatar className="w-32 h-32">
-              <AvatarImage src={user?.user_metadata?.avatar_url || undefined} alt="Profile" />
-              <AvatarFallback className="text-4xl">{user?.user_metadata?.username?.[0]?.toUpperCase() || ""}</AvatarFallback>
+              <AvatarImage src={profileData.avatar_url || undefined} alt="Profile" />
+              <AvatarFallback className="text-4xl">{profileData.username?.[0]?.toUpperCase() || user?.user_metadata?.username?.[0]?.toUpperCase() || ""}</AvatarFallback>
             </Avatar>
           </div>
-          <div className="flex-1 flex flex-col md:flex-row md:items-end gap-6 md:gap-12">
+          <div className="flex-1 flex flex-col gap-4">
             <div className="text-center md:text-left">
-              <h2 className="text-3xl font-bold font-display mb-1">@{user?.user_metadata?.username || "N/A"}</h2>
+              <div className="flex items-center gap-4 justify-center md:justify-start mb-2">
+                <h2 className="text-3xl font-bold font-display">@{profileData.username || user?.user_metadata?.username || "N/A"}</h2>
+                <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                  <UserPlus className="w-4 h-4" />
+                  Follow
+                </button>
+              </div>
+              {(profileData.first_name || profileData.last_name) && (
+                <h3 className="text-xl text-gray-700 mb-2 text-center md:text-left">
+                  {profileData.first_name} {profileData.last_name}
+                </h3>
+              )}
+              {profileData.bio && (
+                <p className="text-gray-600 mb-4 text-center md:text-left max-w-md">
+                  {profileData.bio}
+                </p>
+              )}
               <div className="flex gap-6 justify-center md:justify-start text-aqua-600 font-semibold text-lg">
                 <span className="flex flex-col items-center">
-                  <span className="mb-1 text-xl font-bold">0</span>
+                  <span className="mb-1 text-xl font-bold">{profileData.followers_count}</span>
                   <span className="text-xs font-normal text-gray-500">Followers</span>
                 </span>
                 <span className="flex flex-col items-center">
-                  <span className="mb-1 text-xl font-bold">0</span>
+                  <span className="mb-1 text-xl font-bold">{profileData.following_count}</span>
                   <span className="text-xs font-normal text-gray-500">Following</span>
                 </span>
                 <span className="flex flex-col items-center">
@@ -307,8 +382,16 @@ const Profile = () => {
           </div>
         </div>
       )}
+      
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        currentProfile={profileData}
+        onProfileUpdate={handleProfileUpdate}
+      />
     </div>
   );
 };
 
-export default Profile; 
+export default Profile;

@@ -13,6 +13,8 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [universityEmail, setUniversityEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -37,6 +39,10 @@ const Auth = () => {
     }
     
     if (isSignUp) {
+      if (!firstName || !lastName) {
+        setError('First name and last name are required');
+        return false;
+      }
       if (!username) {
         setError('Username is required');
         return false;
@@ -77,6 +83,8 @@ const Auth = () => {
             emailRedirectTo: `${window.location.origin}/`,
             data: {
               username,
+              first_name: firstName,
+              last_name: lastName,
               university_email: universityEmail || null
             }
           }
@@ -149,6 +157,38 @@ const Auth = () => {
               </div>
             )}
             <form onSubmit={handleAuth} className="space-y-4">
+              {isSignUp && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="firstName" className="block text-sm font-medium text-foreground mb-1">
+                      First Name *
+                    </label>
+                    <input
+                      id="firstName"
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="w-full px-6 py-4 rounded-full border border-border focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
+                      placeholder="First name"
+                      disabled={loading}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="lastName" className="block text-sm font-medium text-foreground mb-1">
+                      Last Name *
+                    </label>
+                    <input
+                      id="lastName"
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="w-full px-6 py-4 rounded-full border border-border focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
+                      placeholder="Last name"
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+              )}
               {isSignUp && (
                 <UsernameInput
                   value={username}

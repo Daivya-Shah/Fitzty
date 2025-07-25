@@ -16,9 +16,15 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          avatar_url: string | null
+          bio: string | null
           created_at: string
+          first_name: string | null
+          followers_count: number | null
+          following_count: number | null
           id: string
           is_university_verified: boolean | null
+          last_name: string | null
           university_domain: string | null
           university_email: string | null
           updated_at: string
@@ -26,9 +32,15 @@ export type Database = {
           username: string
         }
         Insert: {
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
+          first_name?: string | null
+          followers_count?: number | null
+          following_count?: number | null
           id?: string
           is_university_verified?: boolean | null
+          last_name?: string | null
           university_domain?: string | null
           university_email?: string | null
           updated_at?: string
@@ -36,9 +48,15 @@ export type Database = {
           username: string
         }
         Update: {
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
+          first_name?: string | null
+          followers_count?: number | null
+          following_count?: number | null
           id?: string
           is_university_verified?: boolean | null
+          last_name?: string | null
           university_domain?: string | null
           university_email?: string | null
           updated_at?: string

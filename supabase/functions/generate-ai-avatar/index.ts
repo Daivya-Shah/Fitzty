@@ -1,0 +1,66 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { bodyDetails } = await req.json();
+
+    const prompt = `Create a professional portrait photo of a person with the following characteristics: 
+Gender: ${bodyDetails.gender}, 
+Skin tone: ${bodyDetails.skinTone}, 
+Face shape: ${bodyDetails.faceShape}, 
+Hair type: ${bodyDetails.hairType}, 
+Hair length: ${bodyDetails.hairLength}, 
+Hair color: ${bodyDetails.hairColor}, 
+Eye shape: ${bodyDetails.eyeShape}, 
+Eye color: ${bodyDetails.eyeColor}, 
+Body build: ${bodyDetails.bodyBuild}, 
+Height: ${bodyDetails.height}, 
+Weight: ${bodyDetails.weight}. 
+Professional headshot style, clean background, good lighting, looking directly at camera.`;
+
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-image-1',
+        prompt: prompt,
+        n: 1,
+        size: '1024x1024',
+        quality: 'high'
+      }),
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'Failed to generate avatar');
+    }
+
+    return new Response(JSON.stringify({ 
+      imageUrl: data.data[0].url 
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('Error in generate-ai-avatar function:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});
