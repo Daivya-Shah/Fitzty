@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { ArrowRight } from 'lucide-react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import fitztyLogo from "@/assets/fitzty-logo.jpg";
+import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from "@/components/Navbar";
+import UsernameInput from "@/components/UsernameInput";
+import PasswordInput from "@/components/PasswordInput";
 
 const Auth = () => {
   const location = useLocation();
   const [isSignUp, setIsSignUp] = useState(() => location.search.includes('signup'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
   const [universityEmail, setUniversityEmail] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -47,6 +47,10 @@ const Auth = () => {
       }
       if (password.length < 6) {
         setError('Password must be at least 6 characters long');
+        return false;
+      }
+      if (password !== confirmPassword) {
+        setError('Passwords do not match');
         return false;
       }
     }
@@ -146,20 +150,11 @@ const Auth = () => {
             )}
             <form onSubmit={handleAuth} className="space-y-4">
               {isSignUp && (
-                <div>
-                  <label htmlFor="username" className="block text-sm font-medium text-foreground mb-1">
-                    Username *
-                  </label>
-                  <input
-                    id="username"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full px-6 py-4 rounded-full border border-border focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
-                    placeholder="Choose a unique username"
-                    disabled={loading}
-                  />
-                </div>
+                <UsernameInput
+                  value={username}
+                  onChange={setUsername}
+                  disabled={loading}
+                />
               )}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
@@ -197,35 +192,24 @@ const Auth = () => {
                   )}
                 </div>
               )}
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
-                  Password *
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-6 py-4 pr-10 rounded-full border border-border focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
-                    placeholder={isSignUp ? 'Create a secure password' : 'Enter your password'}
-                    disabled={loading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-foreground/60 hover:text-foreground"
-                    disabled={loading}
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                {isSignUp && (
-                  <p className="text-xs text-foreground/60 mt-1">
-                    Must be at least 6 characters long
-                  </p>
-                )}
-              </div>
+              <PasswordInput
+                value={password}
+                onChange={setPassword}
+                disabled={loading}
+                placeholder={isSignUp ? 'Create a secure password' : 'Enter your password'}
+                showStrength={isSignUp}
+                label="Password"
+              />
+              {isSignUp && (
+                <PasswordInput
+                  value={confirmPassword}
+                  onChange={setConfirmPassword}
+                  disabled={loading}
+                  placeholder="Re-enter your password"
+                  showStrength={false}
+                  label="Confirm Password"
+                />
+              )}
               <button
                 type="submit"
                 disabled={loading}
