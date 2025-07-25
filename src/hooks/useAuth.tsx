@@ -57,8 +57,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Continue even if this fails
       }
       
-      // Force page reload for a clean state
-      window.location.href = '/auth';
+      // Force page reload for a clean state and go to sign-in
+      window.location.href = '/auth?signin';
     } catch (error) {
       console.error('Error signing out:', error);
     }
