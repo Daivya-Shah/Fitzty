@@ -121,22 +121,16 @@ const Profile = () => {
       <div className="flex">
         {/* Sidebar */}
         <div className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 shadow-sm flex flex-col pt-20 z-40">
-          {/* Profile Section */}
-          <div className="flex flex-col items-center pt-2 pb-6 border-b border-gray-100">
-            <Avatar className="w-20 h-20 mb-3">
-              <AvatarImage src={profileData.avatar_url || undefined} alt="Profile" />
-              <AvatarFallback className="text-2xl">{profileData.username?.[0]?.toUpperCase() || user?.user_metadata?.username?.[0]?.toUpperCase() || ""}</AvatarFallback>
-            </Avatar>
-            <h3 className="font-semibold text-lg">@{profileData.username || user?.user_metadata?.username || "N/A"}</h3>
+          {/* Edit Profile Button */}
+          <div className="flex flex-col items-center pt-2 pb-4 border-b border-gray-100">
             <button
               onClick={() => setShowEditModal(true)}
-              className="flex items-center gap-2 mt-2 px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <Edit className="w-4 h-4" />
               Edit Profile
             </button>
           </div>
-
           {/* Action Buttons */}
           <div className="flex-1 p-4 space-y-3">
             <button
@@ -256,10 +250,8 @@ const Profile = () => {
           <div className="mb-8">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {wardrobe.map((item) => (
-                <div key={item.id} className="rounded-2xl overflow-hidden shadow-elegant bg-white flex flex-col items-center p-4">
-                  <img src={item.image} alt={item.name} className="w-full h-32 object-cover rounded-xl mb-2" />
-                  <div className="text-base font-semibold text-gray-800">{item.name}</div>
-                  <div className="text-xs text-gray-400 capitalize">{item.type}</div>
+                <div key={item.id} className="rounded-2xl overflow-hidden shadow-elegant bg-white flex items-center justify-center aspect-square w-48 h-48 sm:w-64 sm:h-64 mx-auto p-1">
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover rounded-2xl" />
                 </div>
               ))}
             </div>

@@ -136,13 +136,13 @@ const Hero = () => {
                   <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </a>
               ) : (
-                <a 
-                  href="/auth" 
-                  className="button-primary flex items-center justify-center group w-full sm:w-auto text-center"
-                >
-                  Get Started
-                  <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </a>
+              <a 
+                href="/auth" 
+                className="button-primary flex items-center justify-center group w-full sm:w-auto text-center"
+              >
+                Get Started
+                <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </a>
               )}
             </div>
           </div>

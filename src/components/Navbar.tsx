@@ -54,7 +54,7 @@ const Navbar = () => {
             if (isProfile) {
               window.location.href = "/";
             } else {
-              scrollToTop();
+            scrollToTop();
             }
           }}
           aria-label="Fitzty"
@@ -83,7 +83,7 @@ const Navbar = () => {
             isHome ? (
               <a href="#features" className="nav-link">Features</a>
             ) : (
-              <a href="/explore" className="nav-link">Explore</a>
+          <a href="/explore" className="nav-link">Explore</a>
             )
           )}
         </nav>
@@ -121,7 +121,7 @@ const Navbar = () => {
             isHome ? (
               <a href="#features" className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100">Features</a>
             ) : (
-              <a href="/explore" className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100">Explore</a>
+          <a href="/explore" className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100">Explore</a>
             )
           )}
         </nav>

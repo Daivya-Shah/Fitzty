@@ -34,15 +34,15 @@ Professional headshot style, clean background, good lighting, looking directly a
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'dall-e-3',
+        model: 'dall-e-2',
         prompt: prompt,
         n: 1,
-        size: '1024x1024',
-        quality: 'hd'
-      }),
+        size: '512x512',
+        quality: 'standard'
+      })
     });
 
     const data = await response.json();
@@ -59,9 +59,18 @@ Professional headshot style, clean background, good lighting, looking directly a
       throw new Error('Failed to fetch generated image');
     }
     
-    // Convert to base64
+    // Convert to base64 safely (chunked)
     const imageBuffer = await imageResponse.arrayBuffer();
-    const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
+    function uint8ToString(u8a) {
+      let CHUNK_SZ = 0x8000;
+      let c = [];
+      for (let i = 0; i < u8a.length; i += CHUNK_SZ) {
+        c.push(String.fromCharCode.apply(null, u8a.subarray(i, i + CHUNK_SZ)));
+      }
+      return c.join("");
+    }
+    const binaryString = uint8ToString(new Uint8Array(imageBuffer));
+    const base64Image = btoa(binaryString);
     
     return new Response(JSON.stringify({ 
       imageUrl: `data:image/png;base64,${base64Image}`
