@@ -51,8 +51,20 @@ Professional headshot style, clean background, good lighting, looking directly a
       throw new Error(data.error?.message || 'Failed to generate avatar');
     }
 
+    // Fetch the image from OpenAI's URL to avoid CORS issues
+    const imageUrl = data.data[0].url;
+    const imageResponse = await fetch(imageUrl);
+    
+    if (!imageResponse.ok) {
+      throw new Error('Failed to fetch generated image');
+    }
+    
+    // Convert to base64
+    const imageBuffer = await imageResponse.arrayBuffer();
+    const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
+    
     return new Response(JSON.stringify({ 
-      imageUrl: data.data[0].url 
+      imageUrl: `data:image/png;base64,${base64Image}`
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
