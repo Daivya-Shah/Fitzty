@@ -64,9 +64,59 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <main className="container mx-auto px-4 py-12 mt-8 pt-20">
+      <div className="flex">
+        {/* Sidebar */}
+        <div className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 shadow-sm flex flex-col pt-20 z-40">
+          {/* Profile Section */}
+          <div className="flex flex-col items-center p-6 border-b border-gray-100">
+            <Avatar className="w-20 h-20 mb-3">
+              <AvatarImage src={user?.user_metadata?.avatar_url || undefined} alt="Profile" />
+              <AvatarFallback className="text-2xl">{user?.user_metadata?.username?.[0]?.toUpperCase() || ""}</AvatarFallback>
+            </Avatar>
+            <h3 className="font-semibold text-lg">@{user?.user_metadata?.username || "N/A"}</h3>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex-1 p-4 space-y-3">
+            <button
+              className="w-full button-primary py-3 rounded-full text-base font-semibold"
+              // TODO: Add handler for adding clothing item
+            >
+              + Add Clothing Item
+            </button>
+            <button
+              className="w-full button-primary py-3 rounded-full text-base font-semibold"
+              onClick={() => setShowModal(true)}
+            >
+              + Create Fit
+            </button>
+            <button
+              className="w-full button-primary py-3 rounded-full text-base font-semibold"
+              onClick={() => setShowPostModal(true)}
+              disabled={fits.length === 0}
+            >
+              + Create Post
+            </button>
+          </div>
+
+          {/* Bottom Options */}
+          <div className="p-4 border-t border-gray-100 space-y-3">
+            <button className="w-full flex items-center justify-start px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+              <span className="text-base font-medium">Settings</span>
+            </button>
+            <button
+              onClick={signOut}
+              className="w-full flex items-center justify-start px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <span className="text-base font-medium">Log Out</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <main className="flex-1 ml-64 px-4 py-12 mt-8 pt-20">
         {/* Profile Header */}
         <div className="relative flex flex-col md:flex-row items-center md:items-end gap-8 mb-12">
           <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-primary shadow-lg bg-white">
@@ -96,14 +146,6 @@ const Profile = () => {
                   <span className="text-xs font-normal text-gray-500">Wardrobe</span>
                 </span>
               </div>
-            </div>
-            <div className="flex justify-center md:justify-end">
-              <button
-                onClick={signOut}
-                className="px-6 py-2 rounded-full font-semibold text-base transition-colors duration-200 bg-red-100 text-red-600 hover:bg-red-200"
-              >
-                Log Out
-              </button>
             </div>
           </div>
         </div>
@@ -154,28 +196,7 @@ const Profile = () => {
             </div>
           </div>
         ) : null}
-      </main>
-      {/* Fixed Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 py-4 flex justify-center shadow-lg">
-        <button
-          className="button-primary px-8 py-3 rounded-full text-lg font-bold shadow-md hover:scale-105 transition-transform mr-4"
-          // TODO: Add handler for adding clothing item
-        >
-          + Add Clothing Item
-        </button>
-        <button
-          className="button-primary px-8 py-3 rounded-full text-lg font-bold shadow-md hover:scale-105 transition-transform mr-4"
-          onClick={() => setShowModal(true)}
-        >
-          + Create Fit
-        </button>
-        <button
-          className="button-primary px-8 py-3 rounded-full text-lg font-bold shadow-md hover:scale-105 transition-transform"
-          onClick={() => setShowPostModal(true)}
-          disabled={fits.length === 0}
-        >
-          + Create Post
-        </button>
+        </main>
       </div>
       {/* Create Post Modal */}
       {showModal && (
