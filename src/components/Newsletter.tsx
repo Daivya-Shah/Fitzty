@@ -1,7 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 // import { toast } from "@/components/ui/use-toast";
+import useAuth from "@/hooks/useAuth";
 const Newsletter = () => {
+  const { user } = useAuth();
   return <section id="join-waitlist" className="bg-white py-0">
       <div className="section-container opacity-0 animate-on-scroll">
         <div className="max-w-6xl mx-auto">
@@ -17,7 +19,7 @@ const Newsletter = () => {
           </p>
           
           <div className="flex justify-start md:justify-start">
-            <Link to="/auth?signup" className="button-primary py-4 px-10 text-center">
+            <Link to={user ? "/profile" : "/auth?signup"} className="button-primary py-4 px-10 text-center">
               Sign Up
             </Link>
           </div>
