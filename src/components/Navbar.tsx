@@ -1,11 +1,18 @@
 
 import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Settings } from "lucide-react";
+import fitztyProfile from "@/assets/fitzty-hero.jpg";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import useAuth from "@/hooks/useAuth";
+import { useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useAuth();
+  const location = useLocation();
+  const isHome = location.pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,7 +25,6 @@ const Navbar = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    // Prevent background scrolling when menu is open
     document.body.style.overflow = !isMenuOpen ? 'hidden' : '';
   };
 
@@ -27,8 +33,6 @@ const Navbar = () => {
       top: 0,
       behavior: 'smooth'
     });
-    
-    // Close mobile menu if open
     if (isMenuOpen) {
       setIsMenuOpen(false);
       document.body.style.overflow = '';
@@ -37,12 +41,7 @@ const Navbar = () => {
 
   return (
     <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 py-2 sm:py-3 md:py-4 transition-all duration-300",
-        isScrolled 
-          ? "bg-white/80 backdrop-blur-md shadow-sm" 
-          : "bg-transparent"
-      )}
+      className="fixed top-0 left-0 right-0 z-50 py-2 sm:py-3 md:py-4 bg-white border-b border-gray-200 transition-all duration-300"
     >
       <div className="container flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <a 
@@ -60,18 +59,33 @@ const Navbar = () => {
         </a>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex space-x-8">
+        <nav className="hidden md:flex space-x-8 items-center">
           <a 
-            href="#" 
+            href="/" 
             className="nav-link"
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToTop();
-            }}
-          >
-            Home
-          </a>
-          <a href="#features" className="nav-link">Features</a>
+            {...(isHome ? { onClick: e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } } : {})}
+          >Home</a>
+          {isHome ? (
+            <a href="#features" className="nav-link">Features</a>
+          ) : (
+            <a href="/explore" className="nav-link">Explore</a>
+          )}
+          {/* Only show settings and profile if not on home page after authentication */}
+          {!(user && isHome) && <>
+            <button className="ml-4 p-2 rounded-full bg-white border border-gray-200 shadow hover:bg-aqua-50 transition-colors" aria-label="Settings">
+              <Settings className="w-6 h-6 text-aqua-600" />
+            </button>
+            <a
+              href="/profile"
+              className="ml-2 w-10 h-10 rounded-full hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-primary"
+              aria-label="Profile"
+            >
+              <Avatar>
+                <AvatarImage src={user?.user_metadata?.avatar_url || undefined} alt="Profile" />
+                <AvatarFallback>{user?.user_metadata?.username?.[0]?.toUpperCase() || ""}</AvatarFallback>
+              </Avatar>
+            </a>
+          </>}
         </nav>
 
         {/* Mobile menu button - increased touch target */}
@@ -91,27 +105,31 @@ const Navbar = () => {
       )}>
         <nav className="flex flex-col space-y-8 items-center mt-8">
           <a 
-            href="#" 
-            className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100" 
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToTop();
-              setIsMenuOpen(false);
-              document.body.style.overflow = '';
-            }}
-          >
-            Home
-          </a>
-          <a 
-            href="#features" 
-            className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100" 
-            onClick={() => {
-              setIsMenuOpen(false);
-              document.body.style.overflow = '';
-            }}
-          >
-            Features
-          </a>
+            href="/" 
+            className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100"
+            {...(isHome ? { onClick: e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } } : {})}
+          >Home</a>
+          {isHome ? (
+            <a href="#features" className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100">Features</a>
+          ) : (
+            <a href="/explore" className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100">Explore</a>
+          )}
+          {/* Only show settings and profile if not on home page after authentication */}
+          {!(user && isHome) && <>
+            <button className="mt-4 p-2 rounded-full bg-white border border-gray-200 shadow hover:bg-aqua-50 transition-colors" aria-label="Settings">
+              <Settings className="w-6 h-6 text-aqua-600" />
+            </button>
+            <a
+              href="/profile"
+              className="mt-2 w-10 h-10 rounded-full hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-primary"
+              aria-label="Profile"
+            >
+              <Avatar>
+                <AvatarImage src={user?.user_metadata?.avatar_url || undefined} alt="Profile" />
+                <AvatarFallback>{user?.user_metadata?.username?.[0]?.toUpperCase() || ""}</AvatarFallback>
+              </Avatar>
+            </a>
+          </>}
         </nav>
       </div>
     </header>

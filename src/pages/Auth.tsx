@@ -100,7 +100,7 @@ const Auth = () => {
             setError(error.message);
           }
         } else if (data.user) {
-          navigate('/');
+          navigate('/profile');
         }
       }
     } catch (err: any) {

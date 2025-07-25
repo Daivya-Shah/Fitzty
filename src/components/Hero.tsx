@@ -3,12 +3,14 @@ import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import LottieAnimation from "./LottieAnimation";
 import fitztyHero from "@/assets/fitzty-hero.jpg";
+import useAuth from "@/hooks/useAuth";
 
 const Hero = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const [lottieData, setLottieData] = useState<any>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     // Check if mobile on mount and when window resizes
@@ -125,13 +127,23 @@ const Hero = () => {
               className="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in" 
               style={{ animationDelay: "0.7s" }}
             >
-              <a 
-                href="/auth" 
-                className="button-primary flex items-center justify-center group w-full sm:w-auto text-center"
-              >
-                Get Started
-                <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </a>
+              {user ? (
+                <a 
+                  href="/profile" 
+                  className="button-primary flex items-center justify-center group w-full sm:w-auto text-center"
+                >
+                  View your Profile
+                  <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </a>
+              ) : (
+                <a 
+                  href="/auth" 
+                  className="button-primary flex items-center justify-center group w-full sm:w-auto text-center"
+                >
+                  Get Started
+                  <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </a>
+              )}
             </div>
           </div>
           
