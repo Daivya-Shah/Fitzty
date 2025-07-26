@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { X, Upload, Camera } from 'lucide-react';
+import { X, Upload, Camera, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface EditProfileModalProps {
@@ -12,6 +12,18 @@ interface EditProfileModalProps {
     username?: string;
     bio?: string;
     avatar_url?: string;
+    gender?: string;
+    skin_tone?: string;
+    face_shape?: string;
+    hair_type?: string;
+    hair_length?: string;
+    hair_color?: string;
+    eye_shape?: string;
+    eye_color?: string;
+    body_build?: string;
+    height?: string;
+    weight?: string;
+    profile_picture_type?: string;
   };
   onProfileUpdate: () => void;
 }
@@ -27,21 +39,22 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const [username, setUsername] = useState(currentProfile.username || '');
   const [bio, setBio] = useState(currentProfile.bio || '');
   const [loading, setLoading] = useState(false);
-  const [avatarMode, setAvatarMode] = useState<'upload' | 'ai'>('upload');
+  const [avatarMode, setAvatarMode] = useState<'upload' | 'ai'>(currentProfile.profile_picture_type as 'upload' | 'ai' || 'upload');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [aiAvatarLoading, setAiAvatarLoading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(currentProfile.avatar_url || null);
   const [bodyDetails, setBodyDetails] = useState({
-    gender: '',
-    skinTone: '',
-    faceShape: '',
-    hairType: '',
-    hairLength: '',
-    hairColor: '',
-    eyeShape: '',
-    eyeColor: '',
-    bodyBuild: '',
-    height: '',
-    weight: ''
+    gender: currentProfile.gender || '',
+    skinTone: currentProfile.skin_tone || '',
+    faceShape: currentProfile.face_shape || '',
+    hairType: currentProfile.hair_type || '',
+    hairLength: currentProfile.hair_length || '',
+    hairColor: currentProfile.hair_color || '',
+    eyeShape: currentProfile.eye_shape || '',
+    eyeColor: currentProfile.eye_color || '',
+    bodyBuild: currentProfile.body_build || '',
+    height: currentProfile.height || '',
+    weight: currentProfile.weight || ''
   });
 
   useEffect(() => {
@@ -50,6 +63,21 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       setLastName(currentProfile.last_name || '');
       setUsername(currentProfile.username || '');
       setBio(currentProfile.bio || '');
+      setPreviewUrl(currentProfile.avatar_url || null);
+      setAvatarMode(currentProfile.profile_picture_type as 'upload' | 'ai' || 'upload');
+      setBodyDetails({
+        gender: currentProfile.gender || '',
+        skinTone: currentProfile.skin_tone || '',
+        faceShape: currentProfile.face_shape || '',
+        hairType: currentProfile.hair_type || '',
+        hairLength: currentProfile.hair_length || '',
+        hairColor: currentProfile.hair_color || '',
+        eyeShape: currentProfile.eye_shape || '',
+        eyeColor: currentProfile.eye_color || '',
+        bodyBuild: currentProfile.body_build || '',
+        height: currentProfile.height || '',
+        weight: currentProfile.weight || ''
+      });
     }
   }, [isOpen, currentProfile]);
 
@@ -57,6 +85,11 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -71,11 +104,18 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         throw new Error(response.error.message);
       }
 
-      // Convert the URL to a blob and then to a file for upload
-      const imageResponse = await fetch(response.data.imageUrl);
-      const imageBlob = await imageResponse.blob();
-      const aiFile = new File([imageBlob], 'ai-avatar.png', { type: 'image/png' });
+      // Convert the data URL to a blob and then to a file for upload
+      const base64Data = response.data.imageUrl.split(',')[1];
+      const binaryData = atob(base64Data);
+      const array = new Uint8Array(binaryData.length);
+      for (let i = 0; i < binaryData.length; i++) {
+        array[i] = binaryData.charCodeAt(i);
+      }
+      const blob = new Blob([array], { type: 'image/png' });
+      const aiFile = new File([blob], 'ai-avatar.png', { type: 'image/png' });
+      
       setSelectedFile(aiFile);
+      setPreviewUrl(response.data.imageUrl);
       toast.success('AI avatar generated successfully!');
     } catch (error) {
       console.error('Error generating AI avatar:', error);
@@ -86,12 +126,29 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   };
 
   const handleSave = async () => {
+    // Check if body details are complete
+    const incompleteFields = Object.entries(bodyDetails).filter(([_, value]) => !value);
+    if (incompleteFields.length > 0) {
+      toast.error('Please complete all body details fields before saving.');
+      return;
+    }
+
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
 
       let avatarUrl = currentProfile.avatar_url;
+
+      // Check if body details changed and user had AI avatar
+      const bodyDetailsChanged = Object.entries(bodyDetails).some(
+        ([key, value]) => currentProfile[key as keyof typeof currentProfile] !== value
+      );
+
+      // If body details changed and user had AI avatar, regenerate it
+      if (bodyDetailsChanged && currentProfile.profile_picture_type === 'ai' && avatarMode === 'ai') {
+        await generateAIAvatar();
+      }
 
       // Upload avatar if selected
       if (selectedFile) {
@@ -112,7 +169,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         avatarUrl = publicUrl;
       }
 
-      // Update profile
+      // Update profile with all new fields
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -120,7 +177,19 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           last_name: lastName,
           username,
           bio,
-          avatar_url: avatarUrl
+          avatar_url: avatarUrl,
+          profile_picture_type: avatarMode,
+          gender: bodyDetails.gender,
+          skin_tone: bodyDetails.skinTone,
+          face_shape: bodyDetails.faceShape,
+          hair_type: bodyDetails.hairType,
+          hair_length: bodyDetails.hairLength,
+          hair_color: bodyDetails.hairColor,
+          eye_shape: bodyDetails.eyeShape,
+          eye_color: bodyDetails.eyeColor,
+          body_build: bodyDetails.bodyBuild,
+          height: bodyDetails.height,
+          weight: bodyDetails.weight
         })
         .eq('user_id', user.id);
 
@@ -155,7 +224,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-2xl font-bold">Edit Profile</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
@@ -215,11 +284,34 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
             />
           </div>
 
+          {/* Body Details Section - Mandatory */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Body Details (Required)</h3>
+            <div className="grid grid-cols-3 gap-4">
+              {Object.entries(bodyDetailOptions).map(([key, options]) => (
+                <div key={key}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
+                    {key.replace(/([A-Z])/g, ' $1').trim()} *
+                  </label>
+                  <select
+                    value={bodyDetails[key as keyof typeof bodyDetails]}
+                    onChange={(e) => setBodyDetails(prev => ({ ...prev, [key]: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                    required
+                  >
+                    <option value="">Select...</option>
+                    {options.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Avatar Section */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Profile Picture
-            </label>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Profile Picture</h3>
             <div className="flex gap-4 mb-4">
               <button
                 onClick={() => setAvatarMode('upload')}
@@ -259,37 +351,46 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
             {avatarMode === 'ai' && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  {Object.entries(bodyDetailOptions).map(([key, options]) => (
-                    <div key={key}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
-                        {key.replace(/([A-Z])/g, ' $1').trim()}
-                      </label>
-                      <select
-                        value={bodyDetails[key as keyof typeof bodyDetails]}
-                        onChange={(e) => setBodyDetails(prev => ({ ...prev, [key]: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                      >
-                        <option value="">Select...</option>
-                        {options.map(option => (
-                          <option key={option} value={option}>{option}</option>
-                        ))}
-                      </select>
-                    </div>
-                  ))}
+                <div className="flex gap-4">
+                  <button
+                    onClick={generateAIAvatar}
+                    disabled={aiAvatarLoading || Object.values(bodyDetails).some(v => !v)}
+                    className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {aiAvatarLoading ? 'Generating Avatar...' : 'Generate AI Avatar'}
+                  </button>
+                  {previewUrl && avatarMode === 'ai' && (
+                    <button
+                      onClick={generateAIAvatar}
+                      disabled={aiAvatarLoading || Object.values(bodyDetails).some(v => !v)}
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      Regenerate AI Avatar
+                    </button>
+                  )}
                 </div>
-                <button
-                  onClick={generateAIAvatar}
-                  disabled={aiAvatarLoading || Object.values(bodyDetails).some(v => !v)}
-                  className="w-full py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {aiAvatarLoading ? 'Generating Avatar...' : 'Generate AI Avatar'}
-                </button>
-                {selectedFile && avatarMode === 'ai' && (
-                  <p className="text-sm text-green-600">
-                    AI avatar generated and ready to upload!
+                {Object.values(bodyDetails).some(v => !v) && (
+                  <p className="text-sm text-amber-600">
+                    Please complete all body details to generate an AI avatar.
                   </p>
                 )}
+              </div>
+            )}
+
+            {/* Preview */}
+            {previewUrl && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Preview
+                </label>
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-200">
+                  <img 
+                    src={previewUrl} 
+                    alt="Profile preview" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -304,7 +405,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           </button>
           <button
             onClick={handleSave}
-            disabled={loading}
+            disabled={loading || Object.values(bodyDetails).some(v => !v)}
             className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Saving...' : 'Save Changes'}
