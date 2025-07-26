@@ -12,7 +12,8 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user } = useAuth();
   const location = useLocation();
-  const isHome = location.pathname === "/";
+  const isHome = location.pathname === "/home";
+  const isWaitlist = location.pathname === "/";
   const isAuth = location.pathname.startsWith("/auth");
   const isProfile = location.pathname.startsWith("/profile");
 
@@ -52,7 +53,7 @@ const Navbar = () => {
           onClick={(e) => {
             e.preventDefault();
             if (isProfile) {
-              window.location.href = "/";
+              window.location.href = "/home";
             } else {
             scrollToTop();
             }
@@ -73,14 +74,14 @@ const Navbar = () => {
             >Feed</a>
           ) : (
             <a 
-              href="/" 
+              href={isHome ? "/home" : "/"} 
               className="nav-link"
-              {...(isHome ? { onClick: e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } } : {})}
+              {...((isHome || isWaitlist) ? { onClick: e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } } : {})}
             >Home</a>
           )}
           {/* Hide all other buttons on auth page */}
           {!isAuth && (
-            isHome ? (
+            (isHome || isWaitlist) ? (
               <a href="#features" className="nav-link">Features</a>
             ) : (
           <a href="/explore" className="nav-link">Explore</a>
@@ -111,14 +112,14 @@ const Navbar = () => {
             >Feed</a>
           ) : (
             <a 
-              href="/" 
+              href={isHome ? "/home" : "/"} 
               className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100"
-              {...(isHome ? { onClick: e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } } : {})}
+              {...((isHome || isWaitlist) ? { onClick: e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } } : {})}
             >Home</a>
           )}
           {/* Hide all other buttons on auth page */}
           {!isAuth && (
-            isHome ? (
+            (isHome || isWaitlist) ? (
               <a href="#features" className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100">Features</a>
             ) : (
           <a href="/explore" className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100">Explore</a>
