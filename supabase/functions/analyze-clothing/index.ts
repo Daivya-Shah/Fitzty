@@ -57,7 +57,7 @@ serve(async (req) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model: 'gpt-4o-mini',
           messages: [{ role: 'user', content: 'Say "Test successful"' }],
           max_tokens: 20
         })
@@ -172,14 +172,15 @@ serve(async (req) => {
     console.log('GPT-4 Vision result:', result);
 
     if (action === 'generate_replica') {
-      console.log('Generating image replica with prompt:', result);
+      console.log('Generating image replica with DALL-E...');
       
-      // Generate image replica using DALL-E
+      // Generate image replica using DALL-E 3 for better quality
       const dallERequestBody = {
-        model: 'dall-e-2',
-        prompt: result,
+        model: 'dall-e-3',
+        prompt: `Create an exact replica of this clothing item: ${result}. Make it look identical in style, color, pattern, and design details.`,
         n: 1,
-        size: '512x512'
+        size: '1024x1024',
+        quality: 'standard'
       };
       console.log('DALL-E request body:', dallERequestBody);
       
