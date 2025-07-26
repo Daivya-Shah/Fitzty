@@ -23,6 +23,7 @@ interface EditProfileModalProps {
     body_build?: string;
     height?: string;
     weight?: string;
+    beard_length?: string;
     profile_picture_type?: string;
   };
   onProfileUpdate: () => void;
@@ -54,7 +55,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     eyeColor: currentProfile.eye_color || '',
     bodyBuild: currentProfile.body_build || '',
     height: currentProfile.height || '',
-    weight: currentProfile.weight || ''
+    weight: currentProfile.weight || '',
+    beardLength: currentProfile.beard_length || ''
   });
 
   useEffect(() => {
@@ -76,7 +78,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         eyeColor: currentProfile.eye_color || '',
         bodyBuild: currentProfile.body_build || '',
         height: currentProfile.height || '',
-        weight: currentProfile.weight || ''
+        weight: currentProfile.weight || '',
+        beardLength: currentProfile.beard_length || ''
       });
     }
   }, [isOpen, currentProfile]);
@@ -96,12 +99,22 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const generateAIAvatar = async () => {
     setAiAvatarLoading(true);
     try {
+      console.log('Sending bodyDetails to AI function:', JSON.stringify(bodyDetails, null, 2));
+      
       const response = await supabase.functions.invoke('generate-ai-avatar', {
         body: { bodyDetails }
       });
 
+      console.log('AI function response:', JSON.stringify(response, null, 2));
+
       if (response.error) {
+        console.error('AI function error:', JSON.stringify(response.error, null, 2));
         throw new Error(response.error.message);
+      }
+
+      if (!response.data || !response.data.imageUrl) {
+        console.error('No image URL in response:', JSON.stringify(response, null, 2));
+        throw new Error('No image URL received from AI function');
       }
 
       // Convert the data URL to a blob and then to a file for upload
@@ -117,9 +130,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       setSelectedFile(aiFile);
       setPreviewUrl(response.data.imageUrl);
       toast.success('AI avatar generated successfully!');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating AI avatar:', error);
-      toast.error('Failed to generate AI avatar. Please try again.');
+      toast.error(`Failed to generate AI avatar: ${error.message}`);
     } finally {
       setAiAvatarLoading(false);
     }
@@ -127,9 +140,16 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
   const handleSave = async () => {
     // Check if body details are complete
-    const incompleteFields = Object.entries(bodyDetails).filter(([_, value]) => !value);
+    const requiredFields = ['gender', 'skinTone', 'faceShape', 'hairType', 'hairLength', 'hairColor', 'eyeShape', 'eyeColor', 'bodyBuild', 'height', 'weight'];
+    
+    // Add beard_length as required only for males
+    if (bodyDetails.gender === 'Male') {
+      requiredFields.push('beardLength');
+    }
+    
+    const incompleteFields = requiredFields.filter(field => !bodyDetails[field as keyof typeof bodyDetails]);
     if (incompleteFields.length > 0) {
-      toast.error('Please complete all body details fields before saving.');
+      toast.error('Please complete all required body details fields before saving.');
       return;
     }
 
@@ -189,7 +209,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           eye_color: bodyDetails.eyeColor,
           body_build: bodyDetails.bodyBuild,
           height: bodyDetails.height,
-          weight: bodyDetails.weight
+          weight: bodyDetails.weight,
+          beard_length: bodyDetails.beardLength
         })
         .eq('user_id', user.id);
 
@@ -219,7 +240,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     eyeColor: ['Brown', 'Blue', 'Green', 'Hazel', 'Gray', 'Amber'],
     bodyBuild: ['Slim', 'Athletic', 'Average', 'Heavy', 'Muscular'],
     height: ['Under 5\'0"', '5\'0"-5\'3"', '5\'4"-5\'7"', '5\'8"-5\'11"', '6\'0"-6\'3"', 'Over 6\'3"'],
-    weight: ['Under 120 lbs', '120-150 lbs', '151-180 lbs', '181-220 lbs', 'Over 220 lbs']
+    weight: ['Under 120 lbs', '120-150 lbs', '151-180 lbs', '181-220 lbs', 'Over 220 lbs'],
+    beardLength: ['Clean Shaven', 'Stubble', 'Short Beard', 'Medium Beard', 'Long Beard', 'Full Beard']
   };
 
   return (
@@ -288,24 +310,31 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Body Details (Required)</h3>
             <div className="grid grid-cols-3 gap-4">
-              {Object.entries(bodyDetailOptions).map(([key, options]) => (
-                <div key={key}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
-                    {key.replace(/([A-Z])/g, ' $1').trim()} *
-                  </label>
-                  <select
-                    value={bodyDetails[key as keyof typeof bodyDetails]}
-                    onChange={(e) => setBodyDetails(prev => ({ ...prev, [key]: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                    required
-                  >
-                    <option value="">Select...</option>
-                    {options.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                </div>
-              ))}
+              {Object.entries(bodyDetailOptions).map(([key, options]) => {
+                // Skip beard_length if gender is not Male
+                if (key === 'beardLength' && bodyDetails.gender !== 'Male') {
+                  return null;
+                }
+                
+                return (
+                  <div key={key}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
+                      {key.replace(/([A-Z])/g, ' $1').trim()} *
+                    </label>
+                    <select
+                      value={bodyDetails[key as keyof typeof bodyDetails]}
+                      onChange={(e) => setBodyDetails(prev => ({ ...prev, [key]: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                      required
+                    >
+                      <option value="">Select...</option>
+                      {options.map(option => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

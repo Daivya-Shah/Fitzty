@@ -78,47 +78,46 @@ const AddClothingItemModal: React.FC<AddClothingItemModalProps> = ({
 
     setAiLoading(true);
     try {
-      // Upload image to storage temporarily for analysis
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No user found');
+      console.log('Starting AI image generation...');
+      
+      // Convert image to base64
+      const base64Image = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(selectedFile);
+      });
 
-      const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `temp-${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `temp/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars') // Using avatars bucket for temp storage
-        .upload(filePath, selectedFile);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
+      console.log('Image converted to base64, calling analyze-clothing function...');
       // Generate AI replica
       const response = await supabase.functions.invoke('analyze-clothing', {
         body: { 
-          imageUrl: publicUrl,
+          imageUrl: base64Image,
           action: 'generate_replica'
         }
       });
 
+      console.log('Analyze-clothing response:', response);
+
       if (response.error) {
+        console.error('Analyze-clothing error:', response.error);
         throw new Error(response.error.message);
+      }
+
+      if (!response.data || !response.data.imageUrl) {
+        console.error('No image URL in response:', response);
+        throw new Error('No image URL received from AI function');
       }
 
       setAiGeneratedUrl(response.data.imageUrl);
       toast.success('AI replica generated successfully!');
 
-      // Clean up temp file
-      await supabase.storage
-        .from('avatars')
-        .remove([filePath]);
-
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating AI image:', error);
-      toast.error('Failed to generate AI replica. Please try again.');
+      toast.error(`Failed to generate AI replica: ${error.message}`);
     } finally {
       setAiLoading(false);
     }
@@ -129,54 +128,64 @@ const AddClothingItemModal: React.FC<AddClothingItemModalProps> = ({
 
     setDescriptionLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No user found');
+      console.log('Starting description generation...');
+      
+      // Convert image to base64
+      const base64Image = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(selectedFile);
+      });
 
-      const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `temp-${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `temp/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, selectedFile);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
+      console.log('Image converted to base64, calling analyze-clothing functions...');
       // Generate description and detect clothing type
       const [descResponse, typeResponse] = await Promise.all([
         supabase.functions.invoke('analyze-clothing', {
           body: { 
-            imageUrl: publicUrl,
+            imageUrl: base64Image,
             action: 'analyze_description'
           }
         }),
         supabase.functions.invoke('analyze-clothing', {
           body: { 
-            imageUrl: publicUrl,
+            imageUrl: base64Image,
             action: 'detect_type'
           }
         })
       ]);
 
-      if (descResponse.error) throw new Error(descResponse.error.message);
-      if (typeResponse.error) throw new Error(typeResponse.error.message);
+      console.log('Description response:', descResponse);
+      console.log('Type response:', typeResponse);
+
+      if (descResponse.error) {
+        console.error('Description generation error:', descResponse.error);
+        throw new Error(descResponse.error.message);
+      }
+      if (typeResponse.error) {
+        console.error('Type detection error:', typeResponse.error);
+        throw new Error(typeResponse.error.message);
+      }
+
+      if (!descResponse.data || !descResponse.data.result) {
+        console.error('No description in response:', descResponse);
+        throw new Error('No description received from AI function');
+      }
+      if (!typeResponse.data || !typeResponse.data.result) {
+        console.error('No type in response:', typeResponse);
+        throw new Error('No clothing type received from AI function');
+      }
 
       setDescription(descResponse.data.result);
       setClothingType(typeResponse.data.result);
       toast.success('Description and clothing type generated!');
 
-      // Clean up temp file
-      await supabase.storage
-        .from('avatars')
-        .remove([filePath]);
-
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating description:', error);
-      toast.error('Failed to generate description. Please try again.');
+      toast.error(`Failed to generate description: ${error.message}`);
     } finally {
       setDescriptionLoading(false);
     }
