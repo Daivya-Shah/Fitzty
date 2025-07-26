@@ -54,7 +54,7 @@ const Waitlist = () => {
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
       <Navbar />
       <main className="space-y-4 sm:space-y-8"> {/* Reduced space on mobile */}
         <WaitlistHero />
@@ -64,6 +64,17 @@ const Waitlist = () => {
         <Features />
         <WaitlistNewsletter />
       </main>
+      
+      {/* Secret invisible button at bottom right */}
+      <button
+        onClick={() => window.location.href = '/home'}
+        className="fixed bottom-4 right-4 w-8 h-8 bg-transparent border-none cursor-pointer z-50 opacity-0 hover:opacity-20 transition-opacity duration-300"
+        aria-label="Secret home button"
+        title="Secret home button"
+      >
+        {/* Invisible clickable area */}
+      </button>
+      
       {/* <Footer /> */}
     </div>
   );
