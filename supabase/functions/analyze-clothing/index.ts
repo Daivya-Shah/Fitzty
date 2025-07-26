@@ -16,6 +16,12 @@ serve(async (req) => {
   try {
     const { imageUrl, action } = await req.json();
 
+    console.log(`Processing ${action} for image: ${imageUrl}`);
+
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API key not configured');
+    }
+
     let prompt = '';
     if (action === 'generate_replica') {
       prompt = `Create an exact visual replica of the clothing item shown in this image. Match every detail including color, pattern, style, fit, and any decorative elements. The output should look identical to the input clothing item.`;
@@ -49,12 +55,15 @@ serve(async (req) => {
     const data = await response.json();
     
     if (!response.ok) {
+      console.error('OpenAI API error:', data);
       throw new Error(data.error?.message || 'Failed to analyze clothing');
     }
 
     const result = data.choices[0].message.content;
 
     if (action === 'generate_replica') {
+      console.log('Generating image replica with prompt:', result);
+      
       // Generate image replica using DALL-E
       const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
         method: 'POST',
@@ -73,19 +82,25 @@ serve(async (req) => {
       const imageData = await imageResponse.json();
       
       if (!imageResponse.ok) {
+        console.error('DALL-E API error:', imageData);
         throw new Error(imageData.error?.message || 'Failed to generate replica');
       }
 
       // Fetch the image and convert to base64
       const generatedImageUrl = imageData.data[0].url;
       const imageBlob = await fetch(generatedImageUrl);
+      
+      if (!imageBlob.ok) {
+        throw new Error('Failed to fetch generated image');
+      }
+      
       const imageBuffer = await imageBlob.arrayBuffer();
       
       function uint8ToString(u8a: Uint8Array) {
         let CHUNK_SZ = 0x8000;
         let c = [];
         for (let i = 0; i < u8a.length; i += CHUNK_SZ) {
-          c.push(String.fromCharCode.apply(null, u8a.subarray(i, i + CHUNK_SZ)));
+          c.push(String.fromCharCode.apply(null, Array.from(u8a.subarray(i, i + CHUNK_SZ))));
         }
         return c.join("");
       }

@@ -1,33 +1,40 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
-import fitztyProfile from "@/assets/fitzty-hero.jpg";
-import fitztyWardrobe from "@/assets/fitzty.jpg";
 import useAuth from "@/hooks/useAuth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import EditProfileModal from "@/components/EditProfileModal";
+import AddClothingItemModal from "@/components/AddClothingItemModal";
+import WardrobeItemDetailModal from "@/components/WardrobeItemDetailModal";
 import { Edit, UserPlus } from "lucide-react";
 
-const wardrobe = [
-  { id: 1, name: "Blue Jeans", image: fitztyWardrobe, type: "pants" },
-  { id: 2, name: "White Tee", image: fitztyProfile, type: "top" },
-  { id: 3, name: "Sneakers", image: fitztyWardrobe, type: "shoes" },
-  { id: 4, name: "Yellow Hoodie", image: fitztyProfile, type: "outerwear" },
-  { id: 5, name: "Bucket Hat", image: fitztyWardrobe, type: "accessory" },
-];
+interface WardrobeItem {
+  id: string;
+  image_url: string;
+  description: string;
+  clothing_type: string;
+  brand: string;
+  size: string;
+  upload_type: string;
+  created_at: string;
+}
 
 const Profile = () => {
   const { user, signOut } = useAuth();
   const [tab, setTab] = useState("wardrobe");
   const [showModal, setShowModal] = useState(false);
-  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [postName, setPostName] = useState("");
-  const [posts, setPosts] = useState([]); // No dummy posts
-  const [fits, setFits] = useState([]); // No dummy fits
+  const [posts, setPosts] = useState([]);
+  const [fits, setFits] = useState([]);
   const [avatarReady, setAvatarReady] = useState(false);
   const [showPostModal, setShowPostModal] = useState(false);
   const [selectedFitId, setSelectedFitId] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddClothingModal, setShowAddClothingModal] = useState(false);
+  const [showWardrobeDetailModal, setShowWardrobeDetailModal] = useState(false);
+  const [selectedWardrobeItem, setSelectedWardrobeItem] = useState<WardrobeItem | null>(null);
+  const [wardrobe, setWardrobe] = useState<WardrobeItem[]>([]);
   const [profileData, setProfileData] = useState({
     first_name: '',
     last_name: '',
@@ -35,7 +42,19 @@ const Profile = () => {
     bio: '',
     avatar_url: '',
     followers_count: 0,
-    following_count: 0
+    following_count: 0,
+    gender: '',
+    skin_tone: '',
+    face_shape: '',
+    hair_type: '',
+    hair_length: '',
+    hair_color: '',
+    eye_shape: '',
+    eye_color: '',
+    body_build: '',
+    height: '',
+    weight: '',
+    profile_picture_type: ''
   });
 
   // Fetch profile data
@@ -63,6 +82,29 @@ const Profile = () => {
     fetchProfileData();
   }, [user]);
 
+  // Fetch wardrobe items
+  useEffect(() => {
+    const fetchWardrobe = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('wardrobe_items')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        setWardrobe(data || []);
+      } catch (error) {
+        console.error('Error fetching wardrobe:', error);
+      }
+    };
+
+    fetchWardrobe();
+  }, [user]);
+
   const handleProfileUpdate = () => {
     // Refresh profile data after update
     if (user) {
@@ -76,14 +118,37 @@ const Profile = () => {
         });
     }
   };
+
+  const handleWardrobeUpdate = () => {
+    // Refresh wardrobe after adding/updating items
+    if (user) {
+      supabase
+        .from('wardrobe_items')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .then(({ data }) => {
+          setWardrobe(data || []);
+        });
+    }
+  };
+
+  const handleWardrobeItemClick = (item: WardrobeItem) => {
+    setSelectedWardrobeItem(item);
+    setShowWardrobeDetailModal(true);
+  };
+
   const selectedItems = selectedIds.map(id => wardrobe.find(w => w.id === id)).filter(Boolean);
-  const toggleSelect = (id) => {
+  
+  const toggleSelect = (id: string) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
     setAvatarReady(false);
   };
+  
   const handleCreateAvatar = () => {
     setAvatarReady(true);
   };
+  
   const handleCreateFit = () => {
     if (selectedIds.length < 2) return;
     setFits([
@@ -99,6 +164,7 @@ const Profile = () => {
     setPostName("");
     setAvatarReady(false);
   };
+  
   const handlePostFit = () => {
     if (!selectedFitId) return;
     const fit = fits.find(f => f.id === selectedFitId);
@@ -134,8 +200,8 @@ const Profile = () => {
           {/* Action Buttons */}
           <div className="flex-1 p-4 space-y-3">
             <button
+              onClick={() => setShowAddClothingModal(true)}
               className="w-full button-primary py-3 rounded-full text-base font-semibold"
-              // TODO: Add handler for adding clothing item
             >
               + Add Clothing Item
             </button>
@@ -248,13 +314,24 @@ const Profile = () => {
           </div>
         ) : tab === "wardrobe" ? (
           <div className="mb-8">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {wardrobe.map((item) => (
-                <div key={item.id} className="rounded-2xl overflow-hidden shadow-elegant bg-white flex items-center justify-center aspect-square w-48 h-48 sm:w-64 sm:h-64 mx-auto p-1">
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover rounded-2xl" />
-                </div>
-              ))}
-            </div>
+            {wardrobe.length === 0 ? (
+              <div className="flex flex-col items-center justify-center text-gray-400 text-lg font-semibold min-h-[200px]">
+                <span>No items in wardrobe yet.</span>
+                <span className="text-sm text-gray-500 mt-2">Add your first clothing item to get started!</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {wardrobe.map((item) => (
+                  <div 
+                    key={item.id} 
+                    onClick={() => handleWardrobeItemClick(item)}
+                    className="rounded-2xl overflow-hidden shadow-elegant bg-white flex items-center justify-center aspect-square w-48 h-48 sm:w-64 sm:h-64 mx-auto p-1 cursor-pointer hover:shadow-lg transition-shadow"
+                  >
+                    <img src={item.image_url} alt={item.description} className="w-full h-full object-cover rounded-2xl" />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : tab === "saved" ? (
           <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -284,8 +361,8 @@ const Profile = () => {
                   onClick={() => toggleSelect(item.id)}
                   className={`rounded-xl border-2 ${selectedIds.includes(item.id) ? 'border-primary' : 'border-gray-200'} p-1 transition-all`}
                 >
-                  <img src={item.image} alt={item.name} className="w-full h-20 object-cover rounded-lg" />
-                  <div className="text-xs text-center mt-1">{item.name}</div>
+                  <img src={item.image_url} alt={item.description} className="w-full h-20 object-cover rounded-lg" />
+                  <div className="text-xs text-center mt-1">{item.clothing_type}</div>
                 </button>
               ))}
             </div>
@@ -304,7 +381,7 @@ const Profile = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {selectedItems.map(item => (
-                    <img key={item.id} src={item.image} className="w-12 h-12 rounded-xl border" alt={item.name} />
+                    <img key={item.id} src={item.image_url} className="w-12 h-12 rounded-xl border" alt={item.description} />
                   ))}
                 </div>
               </div>
@@ -354,8 +431,8 @@ const Profile = () => {
                         AI Avatar
                       </div>
                       <div className="flex gap-2">
-                        {otherItems.map((item, idx) => (
-                          <img key={item.id} src={item.image} className="w-10 h-10 rounded-xl border" alt={item.name} />
+                        {otherItems.map((item) => (
+                          <img key={item.id} src={item.image_url} className="w-10 h-10 rounded-xl border" alt={item.description} />
                         ))}
                       </div>
                       <div className="ml-auto font-semibold">{fit.name}</div>
@@ -381,6 +458,22 @@ const Profile = () => {
         onClose={() => setShowEditModal(false)}
         currentProfile={profileData}
         onProfileUpdate={handleProfileUpdate}
+      />
+
+      {/* Add Clothing Item Modal */}
+      <AddClothingItemModal
+        isOpen={showAddClothingModal}
+        onClose={() => setShowAddClothingModal(false)}
+        onItemAdded={handleWardrobeUpdate}
+      />
+
+      {/* Wardrobe Item Detail Modal */}
+      <WardrobeItemDetailModal
+        isOpen={showWardrobeDetailModal}
+        onClose={() => setShowWardrobeDetailModal(false)}
+        item={selectedWardrobeItem}
+        onItemUpdated={handleWardrobeUpdate}
+        onItemDeleted={handleWardrobeUpdate}
       />
     </div>
   );
